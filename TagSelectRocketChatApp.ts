@@ -35,10 +35,10 @@ class CreateUiModal implements ISlashCommand {
         /***Cargar lista de tags */
         let taglist : any[] = [];
 
-        const response = await http.get('http://linktest.keos.co/webhook/taglistall');
-        // console.log("user", user)
-        // console.log("roomId", roomId)
-        // console.log("room",roomName)
+        const response = await http.get('https://linktest.keos.co/webhook/taglistall');
+        console.log("user", user)
+        console.log("roomId", roomId)
+        console.log("room",roomName)
 
         if(response){
             let  content: any = response.content;
@@ -80,17 +80,17 @@ async function createContextualBarBlocks(modify:IModify, taglist: any, tagSelect
     block.addDividerBlock();
 
 
-    if(tagSelect != null && tagSelect != undefined){
-        block.addInputBlock({
-            blockId: 'tagSelect',
-            element:block.newPlainTextInputElement({
-                actionId: 'tagSelect',
-                placeholder: block.newPlainTextObject('etiqueta seleccionada'),
-                initialValue: tagSelect,
-            }),
-            label: block.newPlainTextObject('Etiqueta seleccionada'),
-        });
-    }
+    // if(tagSelect != null && tagSelect != undefined){
+    //     block.addInputBlock({
+    //         blockId: 'tagSelect',
+    //         element:block.newPlainTextInputElement({
+    //             actionId: 'tagSelect',
+    //             placeholder: block.newPlainTextObject('etiqueta seleccionada'),
+    //             initialValue: tagSelect,
+    //         }),
+    //         label: block.newPlainTextObject('Etiqueta seleccionada'),
+    //     });
+    // }
 
 
     return { // [6]
@@ -124,7 +124,7 @@ export class TagSelectRocketChatApp extends App {
             case 'changeTag': {
                 try{
                     var taglist = Array<any>();
-                    const response = await http.get('http://linktest.keos.co/webhook/taglistall');
+                    const response = await http.get('https://linktest.keos.co/webhook/taglistall');
                     let tagSeleccionado = taglist.find(x => x.id === data.value);
                     if(response){
                         let  content: any = response.content;
@@ -133,8 +133,8 @@ export class TagSelectRocketChatApp extends App {
                             taglist = content.templates_info;
                         }
                     }
-                    // const modal = await createContextualBarBlocks(modify,taglist, tagSeleccionado, "1122", "testando", undefined);
-                    // return context.getInteractionResponder().updateModalViewResponse(modal);
+                    const modal = await createContextualBarBlocks(modify,taglist, tagSeleccionado, "1122", "testando", undefined);
+                    return context.getInteractionResponder().updateModalViewResponse(modal);
 
                 } catch (err) {
                     console.error(err);
@@ -168,19 +168,9 @@ export class TagSelectRocketChatApp extends App {
         } = data.view as any;
 
         let arrayData : any[] = data.view.id.split("*");
-        console.log("🚀 ~ file: TagSelectRocketChatApp.ts ~ line 185 ~ TagSelectRocketChatApp ~ executeViewSubmitHandler ~ arrayData", arrayData)
-        console.log("idroom", arrayData[0])
+        // console.log("🚀 ~ file: TagSelectRocketChatApp.ts ~ line 185 ~ TagSelectRocketChatApp ~ executeViewSubmitHandler ~ arrayData", arrayData)
+        // console.log("idroom", arrayData[0])
 
-        // const room: IRoom =(await read.getRoomReader().getById(arrayData[0])) as IRoom;
-
-        // const cierre = await modify.getUpdater().getLivechatUpdater().closeRoom(room,'cierre');
-        // if (!cierre) {
-        //     throw new Error('CLOSE_CHAT_REQUEST_FAILED_ERROR');
-        // }
-
-
-
-        // console.log("cierre", cierre)
         try {
             const https = require("https");
             const body = JSON.stringify({
