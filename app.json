@@ -1,6 +1,6 @@
 {
     "id": "301782d3-9163-47c4-9cce-7faa3412420e",
-    "version": "0.0.1",
+    "version": "1.0.1",
     "requiredApiVersion": "^1.19.0",
     "iconFile": "keos.png",
     "author": {
