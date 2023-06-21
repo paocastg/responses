@@ -8,8 +8,8 @@
         "homepage": "keos.co",
         "support": "keos.co"
     },
-    "name": "Cierre de Chat con Tags",
-    "nameSlug": "tagselectrocketchat",
+    "name": "Select Tag",
+    "nameSlug": "tagselect",
     "classFile": "TagSelectRocketChatApp.ts",
     "description": "app para asignar tags a conversaciones",
     "implements": []

@@ -11,7 +11,7 @@ import { API } from '../API/api';
 
 export class TagsCommand implements ISlashCommand {
   // this is what we will type when calling the slashcommand: /contextualbar
-  public command = 'tagclose';
+  public command = 'tagselect';
   public i18nParamsExample = 'tagselect';
   public i18nDescription = 'cierre de conversacion con etiquetas';
   public providesPreview = false;

@@ -28,9 +28,9 @@ export function createTagContextual(modify: IModify, taglist: any, roomId: any, 
 
   return {
     id: roomId + "*" + visitorToken + "*" + visitorId,
-    title: block.newPlainTextObject('Cierre de conversación'),
+    title: block.newPlainTextObject('Etiquetas'),
     submit: block.newButtonElement({
-      text: block.newPlainTextObject('Cerrar'),
+      text: block.newPlainTextObject('Guardar'),
       style: ButtonStyle.DANGER,
     }),
     blocks: block.getBlocks(),

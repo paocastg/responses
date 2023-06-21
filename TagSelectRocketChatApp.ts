@@ -95,18 +95,11 @@ export class TagSelectRocketChatApp extends App {
         } = data.view as any;
 
         try {
-            await api.CloseRoom(state, data)
-        } catch (err) {
-            console.log("CloseRoom err", err)
-        }
-
-        try {
             await api.UpdateTag(state, data)
         } catch (err) {
             console.log("UpdateTag err", err)
         }
-
-        console.log("success tagclose");
+        
         return context.getInteractionResponder().successResponse();
     }
 }
