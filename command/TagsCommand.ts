@@ -8,12 +8,14 @@ import { ISlashCommand, SlashCommandContext } from '@rocket.chat/apps-engine/def
 
 import { createTagContextual } from '../lib/createTagContextual';
 import { API } from '../API/api';
+import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
+import { IApiRequest } from '@rocket.chat/apps-engine/definition/api/IRequest';
 
 export class TagsCommand implements ISlashCommand {
-  // this is what we will type when calling the slashcommand: /contextualbar
-  public command = 'tagselect';
-  public i18nParamsExample = 'tagselect';
-  public i18nDescription = 'cierre de conversacion con etiquetas';
+
+  public command = 'response';
+  public i18nParamsExample = '/response';
+  public i18nDescription = 'responses editables';
   public providesPreview = false;
 
   constructor(private readonly app: App) { }
@@ -21,21 +23,19 @@ export class TagsCommand implements ISlashCommand {
   public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<void> {
     const triggerId = context.getTriggerId() as string; // [1]
     const user = context.getSender();
-    const room: any = context.getRoom();
-    const roomId = context.getRoom().id;
-    const visitorToken = room.visitor.token;
-    const visitorId = room.visitor.id;
-
     const api = new API(read, http);
-    let taglist: any[] = [];
+    let tagList: any[] = [];
+    
 
     try {
       const response = await api.TagList()
+
       if (response) {
         let content: any = response.content;
         if (content !== undefined) {
           content = JSON.parse(content);
-          taglist = content.tags_list;
+          tagList = content.canned_responses;
+
         }
       }
 
@@ -43,7 +43,7 @@ export class TagsCommand implements ISlashCommand {
       console.log("TagList err", err)
     }
 
-    const contextualbarBlocks = await createTagContextual(modify, taglist, roomId, visitorToken, visitorId); // [2]
+    const contextualbarBlocks = await createTagContextual(modify, tagList, null); // [2]
 
     await modify.getUiController().openContextualBarView(contextualbarBlocks, { triggerId }, user); // [3]
 

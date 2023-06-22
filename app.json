@@ -1,5 +1,5 @@
 {
-    "id": "301782d3-9163-47c4-9cce-7faa3412420e",
+    "id": "c59db48d-4b3d-47ba-adfe-94066687c436",
     "version": "1.0.1",
     "requiredApiVersion": "^1.19.0",
     "iconFile": "keos.png",
@@ -8,9 +8,9 @@
         "homepage": "keos.co",
         "support": "keos.co"
     },
-    "name": "Select Tag",
-    "nameSlug": "tagselect",
-    "classFile": "TagSelectRocketChatApp.ts",
+    "name": "Responses Editables",
+    "nameSlug": "responseseditables",
+    "classFile": "ResponseEditableApp.ts",
     "description": "app para asignar tags a conversaciones",
     "implements": []
 }

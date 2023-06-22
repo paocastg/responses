@@ -2,35 +2,49 @@ import {
 
   IModify
 } from '@rocket.chat/apps-engine/definition/accessors';
-import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit';
+import { ButtonStyle, IPlainTextInputElement } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUIKitContextualBarViewParam } from '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder';
 
 
-export function createTagContextual(modify: IModify, taglist: any, roomId: any, visitorToken: any, visitorId: any): IUIKitContextualBarViewParam {
+export function createTagContextual(modify: IModify, taglist: any, responseSeleccionado:any): IUIKitContextualBarViewParam {
   const block = modify.getCreator().getBlockBuilder();
 
   block.addActionsBlock({
     blockId: 'listTags',
     elements: [
-      block.newMultiStaticElement({
-        placeholder: block.newPlainTextObject('seleccione una etiqueta'),
+      block.newStaticSelectElement({
+        placeholder: block.newPlainTextObject('Seleccione un quickresponse:'),
         actionId: 'changeTag',
-        options: taglist.map((tag) => ({
-          text: block.newPlainTextObject(tag.name),
-          value: tag.name,
-          visible: true,
-        })),
-
+        initialValue: 'rocket.cat',
+        options: taglist.map((response) => ({
+          text: block.newPlainTextObject(response.shortcut),
+          value: response.text,
+        }))
       }),
     ],
-
   });
 
+  if(responseSeleccionado != undefined && responseSeleccionado != null){
+    console.log("seleccionado", responseSeleccionado.text)
+    block.addInputBlock({
+      blockId: 'response',
+      optional: false,
+      element: block.newPlainTextInputElement({
+        actionId: `changeresponse`,
+        initialValue: responseSeleccionado.text,  
+        multiline: true,
+      }),
+      label: block.newPlainTextObject('QuickResponse Descripción:'),
+  });
+  }
+
+
+  
   return {
-    id: roomId + "*" + visitorToken + "*" + visitorId,
-    title: block.newPlainTextObject('Etiquetas'),
+    id: 'contextualbarId' ,
+    title: block.newPlainTextObject('Quickresponses Editables'),
     submit: block.newButtonElement({
-      text: block.newPlainTextObject('Guardar'),
+      text: block.newPlainTextObject('Enviar'),
       style: ButtonStyle.DANGER,
     }),
     blocks: block.getBlocks(),
