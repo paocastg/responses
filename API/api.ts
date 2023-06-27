@@ -49,14 +49,9 @@ export class API {
     return response;
   }
 
-  public async createMessage(state: any, request: IApiRequest) {
+  
 
-    // const rid = request.content.session.slice(
-    //   request.content.session.lastIndexOf('/') + 1,
-    //   request.content.session.length,
-    // );
-
-    console.log("rid-------------------------", request)
+  public async createMessage(state: any, data) {
 
     const settingsReader = this.read.getEnvironmentReader().getSettings();
     const RocketID = await settingsReader.getValueById(SettingId.XUserId)
@@ -65,9 +60,10 @@ export class API {
     const baseurl = await this.getUrlbase();
     const url_updatevisitor = `${baseurl}/api/v1/chat.sendMessage`; //${baseurl}/api/v1/livechat/visitor
 
+    
 
     let mensaje = {
-        "rid": 'KxWQ9hcWfJ7RsQ855',
+        "rid": data.view.id,
         "msg": state.response.changeresponse,
     }
 
@@ -90,6 +86,7 @@ export class API {
         timeout: 5000,
         rejectUnauthorized: false
     };
+
     console.log(`CreateMessage url[${url_updatevisitor}] | httpRequest `, httpRequest);
 
     try {

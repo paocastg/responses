@@ -17,7 +17,6 @@ import { TagsCommand } from './command/TagsCommand';
 import { createTagContextual } from './lib/createTagContextual';
 import { API } from './API/api';
 import { SettingId } from './config/Settings';
-import { request } from 'http';
 import { IApiRequest } from '@rocket.chat/apps-engine/definition/api';
 
 
@@ -49,50 +48,52 @@ export class ResponseEditableApp extends App {
     }
 
 
-    public async executeBlockActionHandler(context: UIKitBlockInteractionContext, read: IRead, http: IHttp, persistence:IPersistence, modify: IModify) {
+    public async executeBlockActionHandler(context: UIKitBlockInteractionContext, read: IRead, http: IHttp, persistence:IPersistence, modify: IModify): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
         const { actionId } = data;
         const api = new API(read, http);
         let responseList = Array<any>();
         let responseSeleccionado:any;
-
-
-
-        try {
-            const response = await api.TagList()
-            
-            if (response) {
-                let content: any = response.content;
-                if (content !== undefined) {
-                    content = JSON.parse(content);
-                    responseList = content.canned_responses;
-                  
-                }
-            }
-
-        } catch (err) {
-            console.log("TagList err", err)
-        }
-       
-        responseSeleccionado = responseList.find(x => x.text=== data.value);
+        let rid = data.container.id;
 
         switch (actionId) {
-            case 'changeTag': {           
-                const modal = await createTagContextual(modify, responseList, responseSeleccionado  );
-                return context.getInteractionResponder().updateModalViewResponse(modal);
+            case 'changeTag': {    
+                try {
+                    const response = await api.TagList()
+                    
+                    if (response) {
+                        let content: any = response.content;
+                        if (content !== undefined) {
+                            content = JSON.parse(content);
+                            responseList = content.canned_responses;
+                          
+                        }
+                    }
+                    
+                } catch (err) {
+                    console.log("TagList err", err)
+                }
+               
+                     
+                
             }
 
+
         }
+        responseSeleccionado = responseList.find(x => x.text=== data.value);  
+        const modal = await createTagContextual(modify, responseList, responseSeleccionado, rid  );
+        await modify.getUiController().updateContextualBarView(modal, { triggerId: data.triggerId }, data.user);
+        
         return {
             success: true,
         };
     }
 
 
-    public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, request: IApiRequest){
-        const data = context.getInteractionData()
-        const api = new API(read, http);
+    public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp, request: IApiRequest): Promise<IUIKitResponse>{
+        const data = context.getInteractionData();
 
+        const api = new API(read, http);
 
         const { state }: {
             state: {
@@ -107,9 +108,13 @@ export class ResponseEditableApp extends App {
 
 
         try {
-            await api.createMessage(state, request)
+            await api.createMessage(state, data)
         } catch (err) {
             console.log("CreateMessage err", err)
         }
+
+        return {
+            success: true,
+        };
     }
 }

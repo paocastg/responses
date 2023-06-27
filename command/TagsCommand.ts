@@ -25,7 +25,7 @@ export class TagsCommand implements ISlashCommand {
     const user = context.getSender();
     const api = new API(read, http);
     let tagList: any[] = [];
-    
+    const rid = context.getRoom().id
 
     try {
       const response = await api.TagList()
@@ -43,7 +43,7 @@ export class TagsCommand implements ISlashCommand {
       console.log("TagList err", err)
     }
 
-    const contextualbarBlocks = await createTagContextual(modify, tagList, null); // [2]
+    const contextualbarBlocks = await createTagContextual(modify, tagList, null, rid); // [2]
 
     await modify.getUiController().openContextualBarView(contextualbarBlocks, { triggerId }, user); // [3]
 
