@@ -16,7 +16,7 @@ import { IUIKitResponse, UIKitBlockInteractionContext, UIKitViewSubmitInteractio
 import { TagsCommand } from './command/TagsCommand';
 import { createTagContextual } from './lib/createTagContextual';
 import { API } from './API/api';
-import { SettingId } from './config/Settings';
+import { settings } from './config/Settings';
 import { IApiRequest } from '@rocket.chat/apps-engine/definition/api';
 
 
@@ -28,23 +28,11 @@ export class ResponseEditableApp extends App {
 
     protected async extendConfiguration(configuration: IConfigurationExtend): Promise<void> {
         await configuration.slashCommands.provideSlashCommand(new TagsCommand(this));
-        configuration.settings.provideSetting({
-            id: SettingId.XUserId,
-            type: SettingType.STRING,
-            packageValue: '',
-            required: true,
-            public: false,
-            i18nLabel: 'X-User-Id',
-        });
-        configuration.settings.provideSetting({
-            id: SettingId.XAuthToken,
-            type: SettingType.STRING,
-            packageValue: '',
-            required: true,
-            public: false,
-            i18nLabel: 'X-Auth-Token',
-        });
-
+        await Promise.all(
+			settings.map((setting) =>
+				configuration.settings.provideSetting(setting),
+			),
+		);
     }
 
 
