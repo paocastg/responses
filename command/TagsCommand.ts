@@ -106,7 +106,7 @@ export class TagsCommand implements ISlashCommand {
           message.setText(response.message);
           modify.getCreator().finish(message);
       } else {
-          throw new Error('Could not get a response1.');
+          throw new Error('Could not get a response.');
       }
     } catch (error) {
       const rocketSender = await read.getUserReader().getById('rocket.cat');
@@ -117,6 +117,8 @@ export class TagsCommand implements ISlashCommand {
     }
   }
   public async previewer(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<ISlashCommandPreview> {
+    const triggerId = context.getTriggerId() as string; // [1]
+    const user = context.getSender();
     const data = {
         room: (context.getRoom() as any),
     };
@@ -127,18 +129,7 @@ export class TagsCommand implements ISlashCommand {
     const client = context.getRoom().displayName;
     const api = new API(read, http);
     const command = context.getArguments();
-
-
-    // if (command[0] === 'help') {
-    //     return {
-    //         i18nTitle: 'qr_command_preview',
-    //         items: [{
-    //             id: 'help',
-    //             type: SlashCommandPreviewItemType.TEXT,
-    //             value: 'Print help.',
-    //         }],
-    //     };
-    // }
+    const rid = context.getRoom().id
 
     if (command[0] === 'list') {
         return {
@@ -155,8 +146,8 @@ export class TagsCommand implements ISlashCommand {
     const apiURL = `${baseurl}/api/v1/canned-responses.list`;
 
     const key = command.join(' ').toLowerCase();
-    try {
 
+    try {
         let result = await http.get(`${apiURL}?key=${key}`
             , {
                 headers: {
@@ -200,11 +191,8 @@ export class TagsCommand implements ISlashCommand {
     };
 }
 
-// tslint:disable-next-line:max-line-length
 public async executePreviewItem(item: ISlashCommandPreviewItem, context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<void> {
-    // if (item.id === 'help') {
-    //     return this.processHelpCommand(context, read, modify);
-    // }
+
     if (item.id === 'list') {
         return this.processListCommand(context, read, modify, http);
     }
@@ -224,22 +212,7 @@ public async executePreviewItem(item: ISlashCommandPreviewItem, context: SlashCo
     modify.getCreator().finish(message);
 }
 
-// public async processHelpCommand(context: SlashCommandContext, read: IRead, modify: IModify): Promise<void> {
-//     const message = await modify.getCreator().startMessage();
-//     const sender = await read.getUserReader().getById('rocket.cat');
-//     const roomEph = context.getRoom();
 
-//     message.setSender(sender);
-//     message.setRoom(roomEph);
-
-//     const text =
-//         `These are the commands I can understand:
-//       \`/qr help\` Get this help.
-//       \`/qr list\` List all available keys.
-//       \`/qr key\` Provide a quickresponse response.`;
-//     message.setText(text);
-//     modify.getNotifier().notifyRoom(roomEph, message.getMessage());
-// }
 
 public async processListCommand(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<void> {
     const settingsReader = read.getEnvironmentReader().getSettings();
