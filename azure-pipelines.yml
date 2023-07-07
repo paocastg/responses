@@ -1,0 +1,36 @@
+parameters:
+  - name: pool_name
+    displayName: agent pool location
+    type: string
+    default: default
+
+
+resources:
+  repositories:
+  - repository: templates
+    name: 'Despliegues_Keos/RCAppsPipelinesTemplates'
+    type: git
+    ref: 'refs/heads/master'
+    trigger:
+    - master
+    - release/*
+
+
+trigger:
+  - development
+  - release
+  - master
+
+
+pool:
+  name: 'default'
+
+
+extends:
+  template: templates/azure-pipelines-apps-rc.yml@templates
+  parameters:
+    sonarqube_project_key: 'Despliegues_Keos_keosdesk-app-quick-responses-list_AYkxL3xb_oGy5b92CrMe'
+    sonarqube_project_name: 'keosdesk-app-quick-responses-list'
+    version_base: "1.0."
+    fileVersion: ./app.json
+    pool_name: ${{parameters.pool_name}}
