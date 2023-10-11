@@ -5,12 +5,10 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 import { ISlashCommand, ISlashCommandPreview, ISlashCommandPreviewItem, SlashCommandContext, SlashCommandPreviewItemType } from '@rocket.chat/apps-engine/definition/slashcommands';
-
 import  createTagContextual from '../lib/createTagContextual';
 import { API } from '../API/api';
 import { Data, Option } from '../interfaces/createModal';
 import { SettingId } from '../config/Settings';
-
 
 export class TagsCommand implements ISlashCommand {
 
@@ -24,12 +22,16 @@ export class TagsCommand implements ISlashCommand {
     private readonly setModalData: (data: any) => void
     ) {}
 
+    /* This application is used in two different ways: the first allows you to open the window to select and edit 
+     the response and the second allows you to list them according to the search parameter that is sent, select 
+     and send it to the conversation. */
+
   public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<void> {
+    //code segment for functionality 1
     const triggerId = context.getTriggerId() as string; // [1]
     const user = context.getSender();
     const api = new API(read, http);
     let tagList: any[] = [];
-    const rid = context.getRoom().id;
 
     const settingsReader = read.getEnvironmentReader().getSettings();
     const xUserId = await settingsReader.getValueById('x_user_id');
@@ -38,6 +40,7 @@ export class TagsCommand implements ISlashCommand {
     const baseurl = await api.getUrlbase();
 
     const apiURL = `${baseurl}/api/v1/canned-responses.list`;
+
     const { value: HideEditionQuickResponses } = await read
 				.getEnvironmentReader()
 				.getSettings()
@@ -45,6 +48,7 @@ export class TagsCommand implements ISlashCommand {
 			
     const command = context.getArguments();
     
+    // get the list of responses from the api
     try {
       const response = await api.TagList()
       if (response) {
@@ -60,6 +64,23 @@ export class TagsCommand implements ISlashCommand {
     }
 
     const modalData: Data[] = [
+   
+        {
+            blockId: "shortcut",
+            actioId: "changeResponse",
+            blockType: "action",
+            elementType: "select",
+            placeholder: "Seleccione un response",
+            options: tagList,
+        },
+        {
+            blockId: "descripcionText",
+            actioId: "changeDescription",
+            blockType: "section",
+            elementType: "text",
+            label: `DESCRIPCIÓN:  ` ,
+        },
+        // ${responseSeleccionado}
         {
             blockId: "response",
             actioId: "changeresponse",
@@ -70,14 +91,16 @@ export class TagsCommand implements ISlashCommand {
             optional: false,
         }
     ]
-
+//validates if the editable response configurable parameter is on, shows the contextual window
     if (HideEditionQuickResponses) {
       if (command.length === 0 || command[0] === '') {
-        const contextualbarBlocks = await createTagContextual({modify, taglist, data: modalData}); 
+        const contextualbarBlocks = await createTagContextual({modify, data: modalData}); 
         this.setModalData({viewState: modalData});
         return await modify.getUiController().openContextualBarView(contextualbarBlocks, { triggerId }, user); 
       } 
     }
+
+    //code segment for functionality 2
 
     if (command[0] === 'list') {
       return this.processListCommand(context, read, modify, http);
@@ -129,11 +152,7 @@ export class TagsCommand implements ISlashCommand {
     }
   }
   public async previewer(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<ISlashCommandPreview> {
-    const triggerId = context.getTriggerId() as string; // [1]
-    const user = context.getSender();
-    const data = {
-        room: (context.getRoom() as any),
-    };
+
     const settingsReader = read.getEnvironmentReader().getSettings();
     const token = await settingsReader.getValueById('x_auth_token');
     const id = await settingsReader.getValueById('x_user_id');

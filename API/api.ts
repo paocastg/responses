@@ -12,6 +12,7 @@ export class API {
 
   }
 
+  // calls to apis to obtain responses and send message to conversation
 
   public getUrlbase(): Promise<string> {
     const serverURL = this.read
@@ -46,8 +47,6 @@ export class API {
     response = await this.http.get(url, httpRequest);
     return response;
   }
-
-  
 
   public async createMessage(state: any, data) {
 
