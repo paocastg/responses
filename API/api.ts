@@ -1,7 +1,5 @@
 import { IHttp, IHttpRequest, IRead } from "@rocket.chat/apps-engine/definition/accessors";
 import { SettingId } from "../config/Settings";
-import { IApiRequest, IApiResponse } from "@rocket.chat/apps-engine/definition/api";
-import { ILivechatMessage, ILivechatRoom } from "@rocket.chat/apps-engine/definition/livechat";
 
 export class API {
   protected read: IRead;
@@ -60,7 +58,6 @@ export class API {
     const baseurl = await this.getUrlbase();
     const url_updatevisitor = `${baseurl}/api/v1/chat.sendMessage`; //${baseurl}/api/v1/livechat/visitor
 
-    
 
     let mensaje = {
         "rid": data.view.id,

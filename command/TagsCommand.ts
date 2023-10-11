@@ -6,20 +6,23 @@ import {
 import { App } from '@rocket.chat/apps-engine/definition/App';
 import { ISlashCommand, ISlashCommandPreview, ISlashCommandPreviewItem, SlashCommandContext, SlashCommandPreviewItemType } from '@rocket.chat/apps-engine/definition/slashcommands';
 
-import { createTagContextual } from '../lib/createTagContextual';
+import  createTagContextual from '../lib/createTagContextual';
 import { API } from '../API/api';
-import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
+import { Data, Option } from '../interfaces/createModal';
 import { SettingId } from '../config/Settings';
 
 
 export class TagsCommand implements ISlashCommand {
 
   public command = 'response';
-  public i18nParamsExample = '/qr';
+  public i18nParamsExample = '';
   public i18nDescription = 'responses editables';
-  public providesPreview = true;
+  public providesPreview = false;
 
-  constructor(private readonly app: App) { }
+  constructor(
+    private readonly app: App,
+    private readonly setModalData: (data: any) => void
+    ) {}
 
   public async executor(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<void> {
     const triggerId = context.getTriggerId() as string; // [1]
@@ -44,7 +47,6 @@ export class TagsCommand implements ISlashCommand {
     
     try {
       const response = await api.TagList()
-
       if (response) {
         let content: any = response.content;
         if (content !== undefined) {
@@ -53,14 +55,26 @@ export class TagsCommand implements ISlashCommand {
 
         }
       }
-
     } catch (err) {
       console.log("TagList err", err)
     }
 
+    const modalData: Data[] = [
+        {
+            blockId: "response",
+            actioId: "changeresponse",
+            blockType: "input",
+            elementType: "text",
+            label: 'Editar respuesta',
+            multiline: true,
+            optional: false,
+        }
+    ]
+
     if (HideEditionQuickResponses) {
       if (command.length === 0 || command[0] === '') {
-        const contextualbarBlocks = await createTagContextual(modify, tagList, null, rid); 
+        const contextualbarBlocks = await createTagContextual({modify, taglist, data: modalData}); 
+        this.setModalData({viewState: modalData});
         return await modify.getUiController().openContextualBarView(contextualbarBlocks, { triggerId }, user); 
       } 
     }
@@ -71,9 +85,7 @@ export class TagsCommand implements ISlashCommand {
 
     const message = await modify.getCreator().startMessage();
     const sender = await read.getUserReader().getByUsername(context.getSender().username);
-
     const room = await read.getRoomReader().getById(context.getRoom().id);
-
     const roomEph = context.getRoom();
 
     if (!room) {
@@ -211,8 +223,6 @@ public async executePreviewItem(item: ISlashCommandPreviewItem, context: SlashCo
     message.setText(item.value);
     modify.getCreator().finish(message);
 }
-
-
 
 public async processListCommand(context: SlashCommandContext, read: IRead, modify: IModify, http: IHttp): Promise<void> {
     const settingsReader = read.getEnvironmentReader().getSettings();
