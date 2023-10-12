@@ -71,16 +71,19 @@ export class TagsCommand implements ISlashCommand {
             blockType: "action",
             elementType: "select",
             placeholder: "Seleccione un response",
-            options: tagList,
+            options: tagList.map((data: any) => ({
+                text: data["shortcut"],
+                value: data.text,
+            })),
         },
         {
             blockId: "descripcionText",
             actioId: "changeDescription",
             blockType: "section",
             elementType: "text",
-            label: `DESCRIPCIÓN:  ` ,
+            label: `DESCRIPCIÓN: `  ,
         },
-        // ${responseSeleccionado}
+
         {
             blockId: "response",
             actioId: "changeresponse",
@@ -91,7 +94,8 @@ export class TagsCommand implements ISlashCommand {
             optional: false,
         }
     ]
-//validates if the editable response configurable parameter is on, shows the contextual window
+
+    //validates if the editable response configurable parameter is on, shows the contextual window
     if (HideEditionQuickResponses) {
       if (command.length === 0 || command[0] === '') {
         const contextualbarBlocks = await createTagContextual({modify, data: modalData}); 

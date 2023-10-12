@@ -17,8 +17,6 @@ import  createTagContextual from './lib/createTagContextual';
 import { API } from './API/api';
 import { settings } from './config/Settings';
 
-
-
 export class ResponseEditableApp extends App  implements IUIKitInteractionHandler {
     public modalData: Partial<{ viewState: Data[]}>;
     public responsesValue: any[] = [];
@@ -45,9 +43,8 @@ export class ResponseEditableApp extends App  implements IUIKitInteractionHandle
 
     public async executeBlockActionHandler(context: UIKitBlockInteractionContext, read: IRead, http: IHttp, persistence:IPersistence, modify: IModify): Promise<IUIKitResponse> {
         const data = context.getInteractionData();
-        const value = JSON.parse(data.value!);
+        const value = data.value!;
         let modalDs: Data[] = this.modalData.viewState!;
-
 
         const api = new API(read, http);
         let responseList = Array<any>();
@@ -65,35 +62,42 @@ export class ResponseEditableApp extends App  implements IUIKitInteractionHandle
             console.log(`Quickresponses editables [][executeBlockActionHandler] unexpected err`,err )
         }
 
-        // check if it's last service level to get service aggreement
-        if (/services/.test(data.blockId)) {
-            if (!Array.isArray(value)) {
-                let md: Data[] = [];
-                for (let i = 0; i < modalDs.length; i++) {
-                    let mData = modalDs[i];
+        if (/shortcut/.test(data.blockId)) {
+            let newViewState: Data[] = [];
+            for (let i = 0; i < this.modalData.viewState!.length; i++) {
+                const block = this.modalData.viewState![i];
+                if(/descripcionText/.test(block.blockId)){
+                    const newBlockData: Data = {
+                        blockId: `descripcionText-${Date.now()}`,
+                        blockType: "section",
+                        elementType: "text",
+                        label: `DESCRIPCIÓN: ${data.value}`,
+                    };
 
-                    if (mData.blockId === "SLA") {
-                        const isServiceID = Number(
-                            this.responsesValue[this.responsesValue.length - 1]
-                        );
-
-                        if (isServiceID) {
-                            const slaData = await req.getSLAlist(isServiceID);
-
-                            const sla: Option[] = mapOptions(
-                                Array.from(slaData.SLAList),
-                                "Title",
-                                "ID"
-                            );
-
-                            mData = { ...mData, options: sla };
-                        }
-                    }
-
-                    md = [...md, mData];
+                    newViewState.push(newBlockData);
+                    continue;
                 }
-                modalDs = md;
+                if (/response/.test(block.blockId)) {
+
+                    const newBlockData: Data = {
+                        blockId: `response-${Date.now()}`,
+                        actioId: `changeresponse-${Date.now()}`,
+                        blockType: "input",
+                        elementType: "text",
+                        label: "Editar respuesta",
+                        multiline: true,
+                        optional: false,
+                        initialValue: data.value,
+                    };
+
+                    newViewState.push(newBlockData);
+                    continue;
+                }
+
+                newViewState.push(block);
             }
+
+            modalDs = newViewState;
         }
 
         const modal = await createTagContextual({
@@ -119,7 +123,7 @@ export class ResponseEditableApp extends App  implements IUIKitInteractionHandle
 
     public async executeViewSubmitHandler(context: UIKitViewSubmitInteractionContext, read: IRead, http: IHttp): Promise<IUIKitResponse>{
         const data = context.getInteractionData();
-
+        this.getLogger().debug(data.view.state, " all the state ");
         const api = new API(read, http);
 
         const { state }: {
@@ -133,7 +137,7 @@ export class ResponseEditableApp extends App  implements IUIKitInteractionHandle
             }
         } = data.view as any;
 
-//sending the message to the conversation
+        //sending the message to the conversation
         try {
             await api.createMessage(state, data)
         } catch (err) {

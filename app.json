@@ -12,5 +12,7 @@
     "nameSlug": "responseseditables",
     "classFile": "ResponseEditableApp.ts",
     "description": "app para asignar tags a conversaciones",
-    "implements": []
+    "implements": [
+        "IUIKitInteractionHandler"
+    ]
 }

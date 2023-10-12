@@ -20,8 +20,6 @@ interface Data {
 interface CreateModal {
     id?: string;
     modify: IModify;
-    taglist?: any[];
-    responseSeleccionado?: string,
     data: Data[];
 }
 
